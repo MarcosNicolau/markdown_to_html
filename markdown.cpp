@@ -44,16 +44,11 @@ string get_default_theme()
 }
 
 // Goes in the themes directory and lists the files
-void list_themes(bool display_in_list = true)
+void list_themes()
 {
     for (const auto &entry : fs::directory_iterator("<DIR_SED>/themes"))
     {
-
-        if (display_in_list)
-            cout << " - " << base_name(remove_ext(entry.path())) << endl;
-
-        else
-            cout << "[" << base_name(remove_ext(entry.path())) << "] ";
+        cout << "   -" << base_name(remove_ext(entry.path())) << endl;
     }
 }
 
@@ -77,16 +72,17 @@ bool validate_theme(string theme)
 
 void show_help()
 {
-    cout << "Usage: markdown [OPTIONS] <FILE_TO_PARSE>" << endl
+    cout << "Usage: markdown [OPTIONS] <MARKDOWN_FILE>" << endl
          << endl;
     cout << "OPTIONS:" << endl;
     cout << "   -t, --title    HTML title, displayed in browser tab (defaults to file name)" << endl;
-    cout << "       --theme    HTML theme. Available options: ";
-    list_themes(false);
+    cout << "       --theme    HTML theme. You can pass a url to a css file or use one of the available themes" << endl;
+    cout << "   -o, --out      Generated HTML output (defaults to the name of the provided file)" << endl;
+
     cout << endl;
-    cout << "   -o, --out      File name of the generated html (defaults to the name of the provided file)" << endl;
-    cout << "   -s, --style    CSS file to change use a custom style instead of default" << endl;
-    cout << "   -h, --help     Display help" << endl;
+    cout << "THEMES:" << endl;
+    list_themes();
+    cout << "To set a default theme run: [export MARKDOWN_DEFAULT_THEME=<THEME>]" << endl;
 }
 
 void show_incorrect_theme(string theme)
@@ -118,13 +114,11 @@ int main(int argc, char *argv[])
         static struct option long_options[] = {
             {"title", required_argument, 0, 't'},
             {"theme", required_argument, 0, 0},
-            {"default-theme", required_argument, 0, 1},
             {"out", required_argument, 0, 'o'},
-            {"style", required_argument, 0, 's'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0},
         };
-        c = getopt_long(argc, argv, "t:0:1:o:s:h",
+        c = getopt_long(argc, argv, "t:0:o:h",
                         long_options, &option_index);
         switch (c)
         {
