@@ -30,7 +30,7 @@ This program requires the cli tool **pandoc**. To install it simply run `sudo ap
 
 ## Add your custom themes
 
-If you want to add your own themes, simply create a file in the [themes](https://github.com/MarcosNicolau/markdown_to_html/themes) folder. Then, to use it, simply pass the file name: <br/>
+If you want to add your own themes, simply create a file in the [themes](https://github.com/MarcosNicolau/markdown_to_html/tree/main/themes) folder. Then, to use it, simply pass the file name: <br/>
 `markdown --theme <MY_THEME> ./<MY_MARKDOWN>.md`
 
 Or pass a url: <br />
@@ -42,11 +42,6 @@ If you wish to change the default theme run: <br />
 <hr/>
 
 ### Warning
-
-Before running `make`, make sure you don't have any other program by the name of "markdown" because it will replace it.
-
-You can rename the program in the Makefile: <br />
-`... -o /usr/bin/<YOUR_NAME>`
 
 Before running `make`, make sure you don't have any other program by the name of "markdown" because it will replace it.
 
