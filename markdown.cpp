@@ -5,9 +5,14 @@
 */
 
 #include <iostream>
+#include <filesystem>
 #include <getopt.h>
+#include <regex>
 
 using namespace std;
+namespace fs = filesystem;
+
+const string ENV_DEFAULT_THEME = "MARKDOWN_DEFAULT_THEME";
 
 // Removes the path from a string
 string base_name(string const &path)
@@ -21,15 +26,54 @@ string remove_ext(string filename)
     return filename.substr(0, filename.find_last_of("."));
 }
 
-// Available Command line options
-struct Options
+// Checks if the string is a url
+bool verify_url(string url)
 {
-    string title = "";
-    string output_file_name = "";
-    // The style file path is generated with sed when compiling the code
-    // If you want to use another default css style, change this path
-    string style_file = "<DIR_SED>/markdown.css";
-};
+    string url_pattern = "\\b((?:https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:, .;]*[-a-zA-Z0-9+&@#/%=~_|])";
+
+    // Construct regex object
+    regex url_regex(url_pattern);
+
+    return regex_match(url, url_regex);
+}
+
+string get_default_theme()
+{
+    char *theme = getenv(ENV_DEFAULT_THEME.c_str());
+    return theme == NULL ? "github" : string(theme);
+}
+
+// Goes in the themes directory and lists the files
+void list_themes(bool display_in_list = true)
+{
+    for (const auto &entry : fs::directory_iterator("<DIR_SED>/themes"))
+    {
+
+        if (display_in_list)
+            cout << " - " << base_name(remove_ext(entry.path())) << endl;
+
+        else
+            cout << "[" << base_name(remove_ext(entry.path())) << "] ";
+    }
+}
+
+// Goes in the themes directory and compares the files name with the passed one to verify that exists
+bool validate_theme(string theme)
+{
+    // First check if the theme is a url
+    bool isValid = false;
+
+    for (const auto &entry : fs::directory_iterator("<DIR_SED>/themes"))
+    {
+        if (theme == base_name(remove_ext(entry.path())))
+        {
+            isValid = true;
+            break;
+        }
+    }
+
+    return isValid;
+}
 
 void show_help()
 {
@@ -37,14 +81,35 @@ void show_help()
          << endl;
     cout << "OPTIONS:" << endl;
     cout << "   -t, --title    HTML title, displayed in browser tab (defaults to file name)" << endl;
-    cout << "   -o, --out      File name of the generated html (defaults to the name of the provided FILE)" << endl;
+    cout << "       --theme    HTML theme. Available options: ";
+    list_themes(false);
+    cout << endl;
+    cout << "   -o, --out      File name of the generated html (defaults to the name of the provided file)" << endl;
     cout << "   -s, --style    CSS file to change use a custom style instead of default" << endl;
     cout << "   -h, --help     Display help" << endl;
 }
 
+void show_incorrect_theme(string theme)
+{
+    cout << theme << " is not a valid theme" << endl
+         << endl;
+    cout << "Available theme options:" << endl;
+
+    list_themes();
+}
+
 int main(int argc, char *argv[])
 {
-    Options options;
+    // Available program options
+    struct Options
+    {
+        string title = "";
+        string output_file_name = "";
+        // The style file path is generated with sed when compiling the code
+        // If you want to use another default css style, change this path
+        string style_file = "<DIR_SED>/themes/" + get_default_theme() + ".css";
+    } options;
+
     // Get options
     int c;
     while (c != -1)
@@ -52,23 +117,37 @@ int main(int argc, char *argv[])
         int option_index = 0;
         static struct option long_options[] = {
             {"title", required_argument, 0, 't'},
+            {"theme", required_argument, 0, 0},
+            {"default-theme", required_argument, 0, 1},
             {"out", required_argument, 0, 'o'},
             {"style", required_argument, 0, 's'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0},
         };
-        c = getopt_long(argc, argv, "o:t:s:h",
+        c = getopt_long(argc, argv, "t:0:1:o:s:h",
                         long_options, &option_index);
         switch (c)
         {
+        case 0:
+        {
+            string theme = optarg;
+            bool is_url = verify_url(theme);
+            if (!is_url && !validate_theme(theme))
+            {
+                show_incorrect_theme(theme);
+                exit(1);
+            }
+            if (is_url)
+                options.style_file = theme;
+            else
+                options.style_file = "<DIR_SED>/themes/" + theme + ".css";
+            break;
+        }
         case 'o':
             options.output_file_name = optarg;
             break;
         case 't':
             options.title = optarg;
-            break;
-        case 's':
-            options.style_file = optarg;
             break;
         case 'h':
             show_help();
