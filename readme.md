@@ -47,8 +47,3 @@ Before running `make`, make sure you don't have any other program by the name of
 
 You can rename the program in the Makefile: <br />
 `... -o /usr/bin/<YOUR_NAME>`
-
-Before running `make`, make sure you don't have any other program by the name of "markdown" because it will replace it.
-
-You can rename the program in the Makefile: <br />
-`... -o /usr/bin/<YOUR_NAME>`
