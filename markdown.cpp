@@ -93,6 +93,6 @@ int main(int argc, char *argv[])
         options.title = filename;
 
     // Run the command
-    string command = "pandoc -s " + file + " -c " + options.style_file + " -f markdown -t html -o " + options.output_file_name + " --metadata title=" + options.title;
+    string command = "pandoc -s --lua-filter=<DIR_SED>/headers_anchor.lua --section-divs " + file + " -c " + options.style_file + " -f markdown -t html -o " + options.output_file_name + " --metadata title=" + options.title;
     system(command.c_str());
 }
