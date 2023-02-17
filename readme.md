@@ -1,6 +1,6 @@
 # Markdown to HTML converter
 
-A CLI program to convert your markdown into an awesome styled HTML.
+A CLI program to convert your markdown into a github styled HTML.
 
 ## How to use it
 
